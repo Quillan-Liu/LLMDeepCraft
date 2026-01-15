@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 
 from app.prompts.utils.prompts_vari_generator import generate_data_model_data
