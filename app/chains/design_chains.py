@@ -1,12 +1,8 @@
-import os
-
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
-
+from app.chains.converter_chains import llm
 from app.prompts.utils.prompts_vari_generator import generate_data_model_data
 from app.schemas.data_entity_schemas import DATA_ENTITY_VALIDATION_SCHEMA, \
   DataModelResponse
-from app.prompts.prompts import STORY_GENERATION_PROMPT, DATA_MODELING_PROMPT, \
+from app.prompts.design_prompts import STORY_GENERATION_PROMPT, DATA_MODELING_PROMPT, \
   SYSTEM_DESIGN_PROMPT
 from app.schemas.final_result_schemas import SystemDesignResponse, \
   FullProjectDesign
@@ -15,19 +11,10 @@ from app.schemas.utils.base_model_converter import base_model_to_dict, \
 from app.schemas.utils.schema_verifier import validate_json_str
 from app.schemas.user_story_shemas import USER_STORY_VALIDATION_SCHEMA, \
   UserStoriesResponse
+from app.history_manager import history_manager
 
 # Initialize the model (Assumes OPENAI_API_KEY is set in environment)
 # using a lower temperature for more deterministic structural output
-
-# Load environment variables
-load_dotenv()
-
-llm = ChatOpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url=os.environ.get("OPENAI_API_URL"),
-    model="qwen-flash",
-    temperature=0.2
-)
 
 # --- Chain 1: User Stories ---
 story_chain = (
@@ -48,6 +35,9 @@ system_design_chain = (
     | llm.with_structured_output(SystemDesignResponse)
 )
 
+
+async def update_project_design(raw_requirements: str) -> FullProjectDesign:
+  pass
 
 # --- Main Orchestrator Function ---
 async def generate_project_design(raw_requirements: str) -> FullProjectDesign:

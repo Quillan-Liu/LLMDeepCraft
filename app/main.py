@@ -1,9 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from app.chains import generate_project_design
+from starlette.responses import PlainTextResponse
+
+from app.chains.converter_chains import query_md_result
+from app.chains.design_chains import generate_project_design
 from app.schemas.final_result_schemas import FullProjectDesign
 import os
 from dotenv import load_dotenv
+from app.history_manager import history_manager
 
 # Load environment variables
 load_dotenv()
@@ -25,7 +29,7 @@ async def root():
 
 
 @app.post("/design", response_model=FullProjectDesign)
-async def design_project(request: DesignRequest):
+async def design_project(request: DesignRequest) -> FullProjectDesign:
   """
   Takes natural language requirements and returns a full project design
   (User Stories, Data Model, System Modules).
@@ -36,9 +40,16 @@ async def design_project(request: DesignRequest):
 
   try:
     result = await generate_project_design(request.requirements)
+    history_manager.save_history_record(result)
     return result
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/convert/json_to_md", response_model=str)
+async def convert_json_to_md(request: FullProjectDesign) -> PlainTextResponse:
+  result = await query_md_result(request)
+  return PlainTextResponse(result)
 
 
 if __name__ == "__main__":

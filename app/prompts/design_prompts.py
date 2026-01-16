@@ -18,7 +18,9 @@ STORY_GENERATION_PROMPT = ChatPromptTemplate.from_messages([
 
 4. 每个用户故事提供 2-4 个清晰的验收标准。
 
-5. 说明或描述的内容应当使用中文
+5. 用户故事的 role 的json字符串的值应当使用汉字， "as a" 应当改为"作为" 
+
+6. 用户故事的 action, value 以及 acceptance_criteria 的json字符串的值应当使用汉字
 
 ## 输出格式 (JSON)
 {schema}
