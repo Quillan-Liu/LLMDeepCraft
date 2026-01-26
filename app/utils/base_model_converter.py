@@ -1,7 +1,6 @@
-from fastapi import HTTPException
 from pydantic import BaseModel
 
-from app.schemas.final_result_schemas import FullProjectDesign
+from app.logger.logger import logger
 
 
 def base_model_to_json(model: BaseModel) -> str:
@@ -14,38 +13,12 @@ def base_model_to_json(model: BaseModel) -> str:
 
 def base_model_to_dict(model: BaseModel) -> dict:
   if not isinstance(model, BaseModel):
-    raise TypeError("输入的模型必须是BaseModel")
+    logger.error("输入的模型不是 BaseModel")
+    raise TypeError("输入的模型必须是 BaseModel")
 
   json_dict = model.model_dump()
 
   return json_dict
-
-def dict_to_full_project_design(
-    stories_result_dict: dict,
-    data_model_dict: dict,
-    system_design_dict: dict
-) -> FullProjectDesign:
-  try:
-    full_project_dict = {
-      "user_stories": stories_result_dict["stories"],
-      "data_model": data_model_dict,
-      "system_design": system_design_dict
-    }
-
-    return FullProjectDesign.model_validate(full_project_dict)
-
-  except (TypeError, ValueError) as e:
-    # 捕获类型错误或值错误（如字段缺失、类型不匹配）
-    raise HTTPException(
-        status_code=500,
-        detail=f"Failed to construct FullProjectDesign from generated data: {str(e)}"
-    )
-  except Exception as e:
-    # 捕获其他潜在异常（如 Pydantic 验证错误）
-    raise HTTPException(
-        status_code=500,
-        detail=f"Unexpected error during model construction: {str(e)}"
-    )
 
 
 if __name__ == '__main__':
